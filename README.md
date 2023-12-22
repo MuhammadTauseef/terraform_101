@@ -2,5 +2,5 @@
 
 ## To install Terraform
 
-Go to https://www.terraform.io/ and click download and choose your platform
+Go to https://www.terraform.io/ click Download and choose your platform
 
