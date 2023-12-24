@@ -4,18 +4,16 @@
 
 Go to https://www.terraform.io/ click Download and choose your platform
 
-## First project using AWS provder
+## First project using AWS provider
 
 Login to AWS Console and navigate to Profile name(top right)->Security Credentials->Access key
 
-If one is not there then create one and copy Access key and secret key into Project1/main.tf file as below
+If one is not there then create one and copy Access key and secret key. Then download AWS CLI and enter below command to enter Access key and secret key.
 
 ```
 # Configure the AWS Provider
 provider "aws" {
   region = "us-east-1"
-  access_key = "my-access-key"
-  secret_key = "my-secret-key"
 }
 ```
 
