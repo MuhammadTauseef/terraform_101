@@ -48,7 +48,53 @@ terraform destroy
 
 Additionally, we can also remove a resource defined in the file and after that when we perform terraform apply, terraform will automatically remove that resource
 
+Furthermore, apply and destroy can be scoped to an individual resource also with -target option while running command e.g. below will create only the specified instance
+```
+terraform apply -target aws_instance.web-server-instance
+```
 To reference a resource e.g. to reference a vpc_id of name main while creating subnet
 ```
 vpc_id = aws_vpc.main.id
+```
+
+To create an output or a printout while creating resources e.g. output elastic IP
+```
+output server_public_ip {
+  value = aws_eip.one.public_ip
+}
+```
+This output will be created while you apply or you can see just the output with terraform output command
+## terraform Files
+
+**.tf** is main extension file where you can create resources
+
+**.tfvars** is used for storing varaibles
+
+**.tfstate** is used to store the state of created resources
+
+## Terraform commands
+|Command  | Description
+| ------| -------
+|state   | working with state of resources created
+|fmt      | Reformat your configuration in the standard style
+|output   | Show output values from your root module
+| refresh  | Update the state to match remote systems
+
+## Variables
+
+Variables can be defined as below.
+
+```
+variable "name_of_variable" {
+  description = "optional description"
+  default = "optional default value"
+  type = String
+}
+```
+
+Variable values can be specified by -var "name_of_variable=Value of variable" flag while using terraform apply, via terraform.tfvars file or by using user input if left unspecified.
+
+terraform.tfvars example:
+```
+name_of_variable = "Value of variable" 
 ```
