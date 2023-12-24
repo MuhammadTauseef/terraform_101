@@ -47,3 +47,8 @@ terraform destroy
 ```
 
 Additionally, we can also remove a resource defined in the file and after that when we perform terraform apply, terraform will automatically remove that resource
+
+To reference a resource e.g. to reference a vpc_id of name main while creating subnet
+```
+vpc_id = aws_vpc.main.id
+```
