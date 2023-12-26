@@ -98,3 +98,71 @@ terraform.tfvars example:
 ```
 name_of_variable = "Value of variable" 
 ```
+
+## Webserver project
+
+The webserver project will have following tasks
+
+1. Create VPC
+```
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+}
+```
+2. Create Internet Gateway
+```
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "main"
+  }
+}
+```
+3. Custom Route Table
+```
+resource "aws_route_table" "route_table" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+
+  route {
+    ipv6_cidr_block        = "::/0"
+    egress_only_gateway_id = aws_egress_only_internet_gateway.gw.id
+  }
+
+  tags = {
+    Name = "example"
+  }
+}
+```
+4. Subnet
+```
+
+```
+5. Assocition of subnet with Route table
+```
+
+```
+6. Security group to allow ports 80 and 443
+```
+
+```
+7. Create a network interface with an IP in the ```
+
+```
+subnet that was created before
+```
+
+```
+8. Assign elastic IP to the network interface created before
+```
+
+```
+9. Create Ubuntu server and enable apache2
+```
+
+```
