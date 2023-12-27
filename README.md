@@ -105,7 +105,7 @@ The webserver project will have following tasks
 
 1. Create VPC
 ```
-resource "aws_vpc" "main" {
+resource "aws_vpc" "vpc" {
   cidr_block = "10.0.0.0/16"
 }
 ```
@@ -122,7 +122,7 @@ resource "aws_internet_gateway" "gw" {
 3. Custom Route Table
 ```
 resource "aws_route_table" "route_table" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -141,28 +141,109 @@ resource "aws_route_table" "route_table" {
 ```
 4. Subnet
 ```
+resource "aws_subnet" "subnet" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = "10.0.1.0/24"
 
+  tags = {
+    Name = "Main"
+  }
+}
 ```
 5. Assocition of subnet with Route table
 ```
-
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.subnet.id
+  route_table_id = aws_route_table.route_table.id
+}
 ```
 6. Security group to allow ports 80 and 443
 ```
+resource "aws_security_group" "allow_web" {
+   name        = "allow_web_traffic"
+   description = "Allow Web inbound traffic"
+   vpc_id      = aws_vpc.vpc.id
+
+   ingress {
+     description = "HTTPS"
+     from_port   = 443
+     to_port     = 443
+     protocol    = "tcp"
+     cidr_blocks = ["0.0.0.0/0"]
+   }
+   ingress {
+     description = "HTTP"
+     from_port   = 80
+     to_port     = 80
+     protocol    = "tcp"
+     cidr_blocks = ["0.0.0.0/0"]
+   }
+
+   ingress {
+     description = "SSH"
+     from_port   = 22
+     to_port     = 22
+     protocol    = "tcp"
+     cidr_blocks = ["0.0.0.0/0"]
+   }
+
+   egress {
+     from_port   = 0
+     to_port     = 0
+     protocol    = "-1"
+     cidr_blocks = ["0.0.0.0/0"]
+   }
+
+   tags = {
+     Name = "allow_web"
+   }
+ }
+```
+7. Create a network interface with an IP in the subnet that was created before
 
 ```
-7. Create a network interface with an IP in the ```
+resource "aws_network_interface" "web-server-nic" {
+  subnet_id       = aws_subnet.subnet.id
+  private_ips     = ["10.0.1.150"]
+  security_groups = [aws_security_group.allow_web.id]
 
-```
-subnet that was created before
-```
-
-```
-8. Assign elastic IP to the network interface created before
+}
 ```
 
+8. Create elastic IP and associate with AWS instance
 ```
-9. Create Ubuntu server and enable apache2
-```
+resource "aws_eip" "one" {
+  vpc      = true
+}
 
+# resource block for ec2 and eip association #
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.web-server-instance.id
+  allocation_id = aws_eip.one.id
+}
+
+output server_public_ip {
+  value = aws_eip.one.public_ip
+}
+```
+9. Create Amazon Linux server and enable web server (httpd)
+```
+resource "aws_instance" "web-server-instance" {
+  ami               = "ami-079db87dc4c10ac91"
+  instance_type     = "t2.micro"
+  availability_zone = "us-east-1a"
+  key_name          = "main-key"
+  network_interface {
+    network_interface_id = aws_network_interface.web-server-nic.id
+    device_index         = 0
+  }
+
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo dnf update -y
+              sudo dnf install -y httpd
+              sudo systemctl start httpd
+              sudo bash -c "echo your very first web server > /var/www/html/index.html"
+              EOF
+}
 ```
