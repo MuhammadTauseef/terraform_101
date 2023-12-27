@@ -247,3 +247,18 @@ resource "aws_instance" "web-server-instance" {
               EOF
 }
 ```
+
+To test execute the following commands
+
+```
+cd terraform_101\webserver
+terraform init
+terraform plan
+terraform apply
+curl <output of server public ip from previous command>
+```
+
+To destroy
+```
+terraform destroy
+```
